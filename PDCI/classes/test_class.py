@@ -6,4 +6,5 @@ Created on 08-Oct-2019
 
 
 class test:
+    print("A book without cover")
     pass
