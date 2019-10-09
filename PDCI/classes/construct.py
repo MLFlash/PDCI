@@ -36,5 +36,5 @@ class construct:
             for l in range(L):
                 q_projs[j, l] = np.dot(uvecs[j, l], q)
                 sorted_trees[j, l] = trees[j, l].sort_tree(q_projs[j, l], n)
-
+        # returning
         return uvecs, trees, sorted_trees, q_projs
