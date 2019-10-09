@@ -30,7 +30,6 @@ class construct:
                 trees[j, l] = AVLTree()
                 for i in range(len(projs)):
                     trees[j, l].insert(projs[i], i, trees[j, l].root)
-
         sorted_trees = np.zeros((m, L), object)
         q_projs = np.zeros((m, L))
         for j in range(m):  # m * L * d
