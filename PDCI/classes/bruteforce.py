@@ -11,7 +11,7 @@ from classes.calc_distance import calc_distance
 
 class bruteforce:
     def __init__(self):
-        calc_distance_object = calc_distance()
+        self.calc_distance_object = calc_distance()
 
     def bruteforce(self, q, dataset, k):
         '''

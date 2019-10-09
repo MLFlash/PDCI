@@ -19,8 +19,8 @@ if __name__ == "__main__":
     bruteforce_object = bruteforce()
 
     # defining the variables
-    n = 10000
-    d = 5000
+    n = 1000
+    d = 500
     d_prime = 50
     m = 20
     L = 20
