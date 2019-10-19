@@ -12,6 +12,12 @@ class AVLTree():
 
     def insert(self, proj, point, currentNode=None):
         '''
+        Inserts a node into the subtree rooted at this node.
+
+        Args:
+            currentNode: The node to be inserted.
+            proj: Projection of a point onto unit vector
+            point: Query Point
         Time Complexity: O(log(n))
         '''
         if self.root == None:
@@ -19,53 +25,61 @@ class AVLTree():
             return
 
         if proj < currentNode.proj:
-            if currentNode.has_left():
-                self.insert(proj, point, currentNode.left)
-            else:
+            if currentNode.left is None:
                 currentNode.left = Node(proj, point, parent=currentNode)
                 self.update_balance(currentNode.left)
-        elif proj > currentNode.proj:
-            if currentNode.has_right():
-                self.insert(proj, point, currentNode.right)
             else:
+                self.insert(proj, point, currentNode.left)
+
+        elif proj > currentNode.proj:
+            if currentNode.right is None:
                 currentNode.right = Node(proj, point, parent=currentNode)
                 self.update_balance(currentNode.right)
+
+            else:
+                self.insert(proj, point, currentNode.right)
+
         else:
             currentNode.points.append(point)
 
     def update_balance(self, node):
         '''
         Time Complexity: O(log(n))
-        ??? why <= we just need to update the inserted node's parent, grandparent, ..., root
-        How many node needs to be updated = how many parents the node has = how many level the tree has = log2n
         '''
-        if node.balance < -1 or node.balance > 1:
+        if node.height < -1 or node.height > 1:
             self.rebalance(node)
             return
         if node.parent != None:
             if node.is_left():
-                node.parent.balance += 1
+                node.parent.height += 1
             elif node.is_right():
-                node.parent.balance -= 1
-            if node.parent.balance != 0:
+                node.parent.height -= 1
+            if node.parent.height != 0:
                 self.update_balance(node.parent)
 
     def rebalance(self, node):
         '''
         Time Complexity: O(C)
+        If tree is out of balance (it's left and right subtrees height differ by more than abs(1)), than we need to rebalance it.
+        Balancing is done by single left or right rotations or with double left or right rotations of the tree.
         '''
-        if node.balance < 0:
-            if node.right.balance > 0:
+        if node.height < 0:
+            if node.right.height > 0:
                 self.right_rotate(node.right)
                 self.left_rotate(node)
             else:
                 self.left_rotate(node)
-        elif node.balance > 0:
-            if node.left.balance < 0:
+        elif node.height > 0:
+            if node.left.height < 0:
                 self.left_rotate(node.left)
                 self.right_rotate(node)
             else:
                 self.right_rotate(node)
+    '''
+    Rotation
+    Tree can be rotated left or right.
+    With left rotation, right subtree root replaces current root. With right rotation, left subtree replaces current root.
+    '''
 
     def left_rotate(self, old_root):
         '''
@@ -90,8 +104,8 @@ class AVLTree():
         new_root.left = old_root
         old_root.parent = new_root
 
-        old_root.balance = old_root.balance + 1 - min(new_root.balance, 0)
-        new_root.balance = new_root.balance + 1 + max(old_root.balance, 0)
+        old_root.height = old_root.height + 1 - min(new_root.height, 0)
+        new_root.height = new_root.height + 1 + max(old_root.height, 0)
 
     def right_rotate(self, old_root):
         '''
@@ -116,23 +130,8 @@ class AVLTree():
         new_root.right = old_root
         old_root.parent = new_root
 
-        old_root.balance = old_root.balance - 1 - max(new_root.balance, 0)
-        new_root.balance = new_root.balance - 1 - min(old_root.balance, 0)
-
-    def display(self, level=0, pref="Root"):
-        if(self.root != None):
-            print('-' * level * 10, pref, "[", self.root.proj, str(self.root.points), "b=" + str(
-                self.root.balance) + "]", 'L' if self.root.is_leaf() else 'N', "]")
-            if self.root.left != None:
-                left_subtree = AVLTree()
-                left_subtree.root = self.root.left
-                left_subtree.display(level + 1, 'L')
-            if self.root.right != None:
-                right_subtree = AVLTree()
-                right_subtree.root = self.root.right
-                right_subtree.display(level + 1, 'R')
-        else:
-            print("Empty Tree")
+        old_root.height = old_root.height - 1 - max(new_root.height, 0)
+        new_root.height = new_root.height - 1 - min(old_root.height, 0)
 
     def predecessor(self, root, pred, proj):
         '''
@@ -166,6 +165,14 @@ class AVLTree():
 
     def successor(self, root, succ, proj):
         '''
+        Returns the node that contains the successor proj 
+
+        Args:
+            proj: Projection onto the unit vector
+
+        Returns:
+            The successor node.
+
         Time Complexity: O(log(n))
         '''
         if root is None:
@@ -224,39 +231,11 @@ class AVLTree():
         else:
             return current_node
 
-    def query(self, proj, k):
-
-        # Time Complexity: O(log(n))
-
-        if self.root is None:
-            return None
-        closest = []
-        node = self.search(self.root, proj)
-        pred = self.predecessor(self.root, None, proj)
-        succ = self.successor(self.root, None, proj)
-        if node is not None:
-            closest += [node]
-        while len(closest) < k + 1:
-            if pred is not None and succ is not None:
-                closest += self.closer(pred, succ, proj)
-            elif pred is not None and succ is None:
-                closest += [pred]
-            elif pred is None and succ is not None:
-                closest += [succ]
-            else:
-                pass
-            if pred is not None:
-                pred = self.predecessor(self.root, None, pred.proj)
-            if succ is not None:
-                succ = self.successor(self.root, None, succ.proj)
-        return closest[k].proj, closest[k].points[0]
-
     def sort_tree(self, proj, n):
         '''
         Given a projection of a point, sort avl tree, return a list of nodes.
         closest = [node1, node2, ..., node3]
         '''
-        #t_start = datetime.now()
         if self.root is None:
             return None
         closest = []
@@ -278,6 +257,4 @@ class AVLTree():
                 pred = self.predecessor(self.root, None, pred.proj)
             if succ is not None:
                 succ = self.successor(self.root, None, succ.proj)
-        #t_end = datetime.now()
-        # print "time:",t_end-t_start
         return closest

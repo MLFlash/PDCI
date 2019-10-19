@@ -13,7 +13,7 @@ class Node():
         self.parent = parent
         self.left = None
         self.right = None
-        self.balance = 0
+        self.height = 0
 
     def has_left(self):
         return True if self.left != None else False
