@@ -15,3 +15,6 @@ class calc_distance:
         Time Complexity: O(d)
         '''
         return np.dot(p - q, p - q)**0.5
+
+    def minkowski_dist(self, p, q):
+        pass
